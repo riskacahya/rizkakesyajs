@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Konversi Suhu: Celcius & Kelvin</title>
+    
+    <!-- Menggunakan Font dari Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Menggunakan Ikon dari FontAwesome (CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #4facfe;
+            --secondary-color: #00f2fe;
+            --bg-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-color: #333;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --error-color: #ff6b6b;
+            --success-color: #1dd1a1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-gradient);
+            padding: 20px;
+        }
+
+        /* Container Utama (Glassmorphism) */
+        .converter-card {
+            background: var(--glass-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .converter-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Elemen Dekoratif Latar Belakang */
+        .circle-bg {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: -1;
+        }
+
+        .circle-1 {
+            width: 150px;
+            height: 150px;
+            top: -50px;
+            left: -50px;
+        }
+
+        .circle-2 {
+            width: 100px;
+            height: 100px;
+            bottom: -30px;
+            right: -30px;
+        }
+
+        h1 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        p.subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        /* Area Input */
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.2);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 18px;
+        }
+
+        /* Pesan Error */
+        .error-msg {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 5px;
+            min-height: 18px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .error-msg.visible {
+            opacity: 1;
+        }
+
+        /* Area Hasil */
+        .result-area {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 10px;
+            border: 1px dashed #ccc;
+        }
+
+        .result-label {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary-color);
+            word-break: break-all;
+        }
+
+        .unit-badge {
+            font-size: 16px;
+            color: #555;
+            font-weight: 400;
+        }
+
+        /* Tombol Reset */
+        .btn-reset {
+            margin-top: 25px;
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reset:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Animasi Ikon Suhu */
+        .temp-icon-anim {
+            font-size: 40px;
+            margin-bottom: 20px;
+            background: -webkit-linear-gradient(#4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .converter-card {
+                padding: 25px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="converter-card">
+        <!-- Dekorasi -->
+        <div class="circle-bg circle-1"></div>
+        <div class="circle-bg circle-2"></div>
+
+        <div class="temp-icon-anim">
+            <i class="fa-solid fa-temperature-three-quarters"></i>
+        </div>
+
+        <h1>Konversi Suhu</h1>
+        <p class="subtitle">Ubah satuan Celcius ke Kelvin atau sebaliknya dengan cepat.</p>
+
+        <!-- Form Input -->
+        <form id="conversionForm" onsubmit="return false;">
+            
+            <!-- Input Celcius -->
+            <div class="input-group">
+                <label for="celsius">Suhu dalam Celcius (°C)</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-thermometer-half input-icon"></i>
+                    <input type="number" id="celsius" placeholder="Masukkan nilai C..." step="any">
+                </div>
+                <div id="cError" class="error-msg">Input tidak valid</div>
+            </div>
+
+            <!-- Input Kelvin -->
+            <div class="input-group">
+                <label for="kelvin">Suhu dalam Kelvin (K)</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-fire input-icon"></i>
+                    <input type="number" id="kelvin" placeholder="Masukkan nilai K..." step="any">
+                </div>
+                <div id="kError" class="error-msg">Input tidak valid</div>
+            </div>
+
+            <!-- Area Hasil (Secara teknis input di atas sudah real-time, tapi kita buat kotak khusus untuk penekanan) -->
+            <div class="result-area">
+                <div class="result-label">Status Konversi</div>
+                <div id="finalResult" class="result-value">0 <span class="unit-badge">°C = 273.15 K</span></div>
+            </div>
+
+            <button type="button" class="btn-reset" onclick="resetForm()">
+                <i class="fa-solid fa-rotate-right"></i> Reset
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Mengambil elemen DOM
+        const celsiusInput = document.getElementById('celsius');
+        const kelvinInput = document.getElementById('kelvin');
+        const finalResultDisplay = document.getElementById('finalResult');
+        const cError = document.getElementById('cError');
+        const kError = document.getElementById('kError');
+
+        // Fungsi Utama Konversi
+        function convertTemperature(source) {
+            // Bersihkan error message
+            cError.classList.remove('visible');
+            kError.classList.remove('visible');
+
+            if (source === 'celsius') {
+                const cVal = parseFloat(celsiusInput.value);
+
+                // Cek apakah input kosong
+                if (celsiusInput.value === '') {
+                    kelvinInput.value = '';
+                    updateResultText(0, 0, false);
+                    return;
+                }
+
+                // Validasi: Cek apakah NaN
+                if (isNaN(cVal)) {
+                    cError.classList.add('visible');
+                    kelvinInput.value = '';
+                    return;
+                }
+
+                // Validasi Fisika: Kelvin tidak bisa negatif (0K adalah nol mutlak)
+                // Celcius tidak bisa kurang dari -273.15
+                if (cVal < -273.15) {
+                    cError.textContent = "Suhu tidak bisa di bawah Nol Mutlak (-273.15°C)";
+                    cError.classList.add('visible');
+                    kelvinInput.value = ''; // Reset hasil karena tidak fisik
+                    return;
+                } else {
+                    cError.textContent = "Input tidak valid"; // Reset pesan error ke default
+                }
+
+                // Rumus: K = C + 273.15
+                const kVal = cVal + 273.15;
+                
+                // Tampilkan hasil di input Kelvin (max 4 desimal agar rapi)
+                kelvinInput.value = parseFloat(kVal.toFixed(4));
+                
+                // Update teks hasil utama
+                updateResultText(cVal, kVal, true);
+
+            } else if (source === 'kelvin') {
+                const kVal = parseFloat(kelvinInput.value);
+
+                if (kelvinInput.value === '') {
+                    celsiusInput.value = '';
+                    updateResultText(0, 0, false);
+                    return;
+                }
+
+                if (isNaN(kVal)) {
+                    kError.classList.add('visible');
+                    celsiusInput.value = '';
+                    return;
+                }
+
+                // Validasi Fisika: Kelvin tidak bisa negatif
+                if (kVal < 0) {
+                    kError.textContent = "Kelvin tidak bisa negatif";
+                    kError.classList.add('visible');
+                    celsiusInput.value = '';
+                    return;
+                } else {
+                    kError.textContent = "Input tidak valid";
+                }
+
+                // Rumus: C = K - 273.15
+                const cVal = kVal - 273.15;
+                
+                celsiusInput.value = parseFloat(cVal.toFixed(4));
+                
+                updateResultText(cVal, kVal, true);
+            }
+        }
+
+        // Fungsi Update Teks Hasil
+        function updateResultText(c, k, isActive) {
+            if (!isActive) {
+                finalResultDisplay.innerHTML = "Menunggu Input...";
+                return;
+            }
+            // Menampilkan hasil dengan format yang rapi
+            const cDisplay = parseFloat(c.toFixed(4));
+            const kDisplay = parseFloat(k.toFixed(4));
+            finalResultDisplay.innerHTML = `${cDisplay} <span class="unit-badge">°C = ${kDisplay} K</span>`;
+        }
+
+        // Event Listeners agar berjalan real-time saat mengetik
+        celsiusInput.addEventListener('input', function() {
+            convertTemperature('celsius');
+        });
+
+        kelvinInput.addEventListener('input', function() {
+            convertTemperature('kelvin');
+        });
+
+        // Fungsi Reset
+        function resetForm() {
+            celsiusInput.value = '';
+            kelvinInput.value = '';
+            cError.classList.remove('visible');
+            kError.classList.remove('visible');
+            finalResultDisplay.innerHTML = "Menunggu Input...";
+            celsiusInput.focus();
+        }
+
+        // Inisialisasi awal
+        resetForm();
+
+    </script>
+</body>
+</html>
